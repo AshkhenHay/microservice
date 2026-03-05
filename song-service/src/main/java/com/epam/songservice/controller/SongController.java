@@ -27,8 +27,17 @@ public class SongController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SongDto> getSong(@PathVariable Long id) {
-        var song = service.getSong(id);
+    public ResponseEntity<SongDto> getSong(@PathVariable String id) {
+        Long parsedId;
+        try {
+            parsedId = Long.parseLong(id);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid value '" + id + "' for ID. Must be a positive integer");
+        }
+        if (parsedId <= 0) {
+            throw new ValidationException("Invalid value '" + id + "' for ID. Must be a positive integer");
+        }
+        var song = service.getSong(parsedId);
         var dto = new SongDto();
         BeanUtils.copyProperties(song, dto);
         return ResponseEntity.ok(dto);
@@ -36,12 +45,26 @@ public class SongController {
 
     @DeleteMapping
     public ResponseEntity<Map<String, List<Long>>> deleteSongs(@RequestParam String id) {
-        if (id.length() > 200) throw new ValidationException("CSV too long");
-        List<Long> ids = Arrays.stream(id.split(","))
-                .map(Long::parseLong)
-                .toList();
-        List<Long> deleted = service.deleteSongs(ids);
-        return ResponseEntity.ok(Map.of("ids", deleted));
+        if (id.length() > 200) {
+            throw new ValidationException("CSV string is too long: received " + id.length() + " characters, maximum allowed is 200");
+        }
+        try {
+            List<Long> ids = Arrays.stream(id.split(","))
+                    .map(String::trim)
+                    .map(idStr -> {
+                        try {
+                            return Long.parseLong(idStr);
+                        } catch (NumberFormatException e) {
+                            throw new ValidationException("Invalid ID format: '" + idStr + "'. Only positive integers are allowed");
+                        }
+                    })
+                    .filter(num -> num > 0)
+                    .toList();
+            List<Long> deleted = service.deleteSongs(ids);
+            return ResponseEntity.ok(Map.of("ids", deleted));
+        } catch (ValidationException e) {
+            throw e;
+        }
     }
 
     // Endpoints used by Resource Service via Feign client

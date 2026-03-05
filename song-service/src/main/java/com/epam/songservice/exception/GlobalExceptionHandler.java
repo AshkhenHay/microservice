@@ -14,6 +14,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ErrorDto> badReq(ValidationException ex) {
+        if (ex.getErrors() != null && !ex.getErrors().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(new ErrorDto(ex.getMessage(), ex.getErrors(), "400"));
+        }
         return ResponseEntity.badRequest()
                 .body(new ErrorDto(ex.getMessage(), "400"));
     }

@@ -25,19 +25,27 @@ public class ResourceFileService {
         if (file == null || file.isEmpty()) {
             throw new ValidationException("File is empty or null");
         }
-        if (!Objects.equals(file.getContentType(), "audio/mpeg")) {
-            throw new ValidationException("Invalid MP3 - content type must be audio/mpeg");
+        String contentType = file.getContentType();
+        if (!Objects.equals(contentType, "audio/mpeg")) {
+            throw new ValidationException("Invalid file format: " + contentType + ". Only MP3 files are allowed");
         }
 
         try {
+            byte[] fileBytes = file.getBytes();
+            if (fileBytes.length == 0) {
+                throw new ValidationException("File content cannot be empty");
+            }
             ResourceFile entity = new ResourceFile();
-            entity.setData(file.getBytes());
+            entity.setData(fileBytes);
             ResourceFile saved = repo.save(entity);
             log.info("Successfully saved resource with ID: {}", saved.getId());
             return saved;
+        } catch (ValidationException e) {
+            // Re-throw validation exceptions as-is
+            throw e;
         } catch (Exception e) {
             log.error("Failed to save resource: {}", e.getMessage(), e);
-            throw new ServerErrorException("Failed to save resource", e);
+            throw new ValidationException("Failed to save resource: " + e.getMessage());
         }
     }
 
