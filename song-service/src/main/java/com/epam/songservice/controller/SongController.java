@@ -43,6 +43,8 @@ public class SongController {
         return ResponseEntity.ok(dto);
     }
 
+    // ... existing code ...
+
     @DeleteMapping
     public ResponseEntity<Map<String, List<Long>>> deleteSongs(@RequestParam String id) {
         if (id.length() > 200) {
@@ -65,26 +67,5 @@ public class SongController {
         } catch (ValidationException e) {
             throw e;
         }
-    }
-
-    // Endpoints used by Resource Service via Feign client
-    @PostMapping("/metadata")
-    public ResponseEntity<Void> createSongMeta(@RequestBody SongMetaCreateDto meta) {
-        // Convert to SongDto and save
-        SongDto dto = new SongDto();
-        dto.setId(meta.getResourceId());
-        dto.setName(meta.getTitle());
-        dto.setArtist(meta.getArtist());
-        dto.setAlbum(meta.getAlbum());
-        dto.setDuration(meta.getDuration());
-        dto.setYear(meta.getReleaseYear());
-        service.createSong(dto);
-        return ResponseEntity.ok().build();
-    }
-
-    @DeleteMapping("/metadata")
-    public ResponseEntity<Void> deleteSongMetas(@RequestParam List<Long> resourceIds) {
-        service.deleteSongs(resourceIds);
-        return ResponseEntity.ok().build();
     }
 }

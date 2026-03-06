@@ -2,9 +2,8 @@ package com.epam.resourceservice.controller;
 
 import com.epam.resourceservice.dto.ResourceIdDto;
 import com.epam.resourceservice.entity.ResourceFile;
+import com.epam.resourceservice.exception.ValidationException;
 import com.epam.resourceservice.service.ResourceFileService;
-import jakarta.validation.ValidationException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;

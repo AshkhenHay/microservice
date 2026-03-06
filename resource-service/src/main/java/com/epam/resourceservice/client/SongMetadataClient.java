@@ -12,10 +12,10 @@ import java.util.List;
 @FeignClient(name = "song-service", url = "${feign.client.song-service.url:http://localhost:8081}")
 public interface SongMetadataClient {
 
-    @PostMapping("/songs/metadata")
+    @PostMapping("/songs")
     void createSongMeta(@RequestBody SongMetaCreateDto metaDto);
 
-    @DeleteMapping("/songs/metadata")
-    void deleteSongMetas(@RequestParam List<Long> resourceIds);
+    @DeleteMapping("/songs")
+    void deleteSongMetas(@RequestParam(value = "id") String resourceIds);
 }
 
